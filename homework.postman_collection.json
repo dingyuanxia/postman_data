@@ -1,0 +1,267 @@
+{
+	"info": {
+		"_postman_id": "f433c9f5-f757-444d-ab7b-b24664105d85",
+		"name": "homework",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "get主题首页",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "62ae5316-fd9d-4550-ad64-ce6081217d57",
+						"type": "text/javascript",
+						"exec": [
+							"// 判断limit是否为1",
+							"pm.test(\"limit=1,返回的数据应该为1\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    console.log(jsonData)",
+							"    var len = jsonData['data'].length",
+							"    console.log(\"len===\",len)",
+							"    pm.expect(len).to.eql(10);",
+							"});",
+							"",
+							"",
+							"// 判断success的状态",
+							"pm.test(\"success应该为true\", function () {",
+							"    // 获取整个服务器返回值，转换为json",
+							"    var jsonData = pm.response.json();",
+							"    // 调试打印（在postman中的console界面）",
+							"    console.log(jsonData)",
+							"    // 取到返回值中的success字段",
+							"    var status = jsonData['success']",
+							"    // 添加断言，判断success字段值是否为true",
+							"    pm.expect(status).to.eql(true);",
+							"});",
+							"",
+							"",
+							"",
+							"// 判断tab的状态",
+							"pm.test(\"tab应该为ask\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    console.log(jsonData)",
+							"    var data_val = jsonData['data']",
+							"    for(i=0;i<data_val.length;i++){",
+							"        console.log(data_val[i]['tab']);",
+							"        // 添加断言判断每个字段tab值，应该为ask",
+							"        pm.expect(data_val[i]['tab']).to.eql('ask');",
+							"    }",
+							"   ",
+							"});",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{base_url}}/topics?page=1&tab=ask&limit=10&mdrender=true",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"topics"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "tab",
+							"value": "ask"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "mdrender",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get主题详情",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{base_url}}/topic/5ba3341dc7011d6643118532?mdrender=false",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"topic",
+						"5ba3341dc7011d6643118532"
+					],
+					"query": [
+						{
+							"key": "mdrender",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "post发表话题",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d2ce4aaa-358a-4854-ad75-706778489779",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"错误提示信息的断言\", function () {",
+							"   //获取整个服务器返回值并转换为json",
+							"    var jsonData = pm.response.json();",
+							"    console.log(\"jsonData == \",jsonData);",
+							"    //获取erro_msg字段值",
+							"    var act_val = jsonData['error_msg'];",
+							"    console.log(\"act_val == \",act_val);",
+							"    //获取环境变量值",
+							"    var except_val = pm.variables.get(\"check_msg\");",
+							"    console.log(except_val);",
+							"    pm.expect(act_val).to.eql(except_val);",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"accesstoken\":\"{{token}}\",\n\t\"title\":\"{{title}}\",\n\t\"tab\":\"{{tab}}\",\n    \"content\":\"{{content}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/topics",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"topics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "post编辑主题",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "491e015d-329b-4c71-b59c-bed3df755bae",
+						"type": "text/javascript",
+						"exec": [
+							"var token=\"5470acfd-94e2-4e71-83f2-0ab65a1c5d18\";",
+							"pm.environment.set(\"newtoken\", token);",
+							"var title = \"kkkkkk\";",
+							"var tab = \"ask\";",
+							"var content = \"mmmmm\";",
+							"",
+							"var url = pm.globals.get(\"base_url\");",
+							"var new_url = url+\"/topics\";",
+							"",
+							"pm.sendRequest({",
+							"    url: new_url,        //请求路径",
+							"    method: 'POST',   //请求方法",
+							"    header: 'Content-Type:application/json',     //请求 header",
+							"    body: {             // 请求参数",
+							"        mode:'raw',     // \bpostman支持的数据格式",
+							"        raw: JSON.stringify({     //将\btext 转换为JSON 数据类型",
+							"    \t    \"accesstoken\":token,",
+							"        \t\"title\":title,",
+							"        \t\"tab\":tab,",
+							"        \t\"content\":content",
+							"        })",
+							"    }",
+							"},function (err, response) {",
+							"    console.log(\"json=====\",response.json());",
+							"    var result = response.json();",
+							"    var topicid = result['topic_id'];",
+							"    pm.environment.set(\"cur_topicid\", topicid);",
+							"});",
+							"",
+							"",
+							"",
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d6906043-4e12-4e82-b784-d4ffa564c0d3",
+						"type": "text/javascript",
+						"exec": [
+							"var current_id = pm.variables.get(\"cur_topicid\");",
+							"console.log(\"current_id=========\",current_id);",
+							"pm.test(\"topicid值应该与创建话题返回的id值一致\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var id = jsonData['topic_id'];",
+							"    console.log(\"id=====\",id);",
+							"    ",
+							"    pm.expect(id).to.eql(current_id );",
+							"});",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"accesstoken\":\"{{newtoken}}\",\n\t\"topic_id\":\"{{cur_topicid}}\",\n\t\"title\":\"testtesttest\",\n\t\"tab\":\"ask\",\n\t\"contet\":\"jjjjjjjjj\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/topics/update",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"topics",
+						"update"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
